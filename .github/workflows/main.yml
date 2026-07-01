@@ -28,19 +28,22 @@ jobs:
       - name: Create fresh Flutter project
         run: |
           flutter create --platforms android scanly_build
-          cd scanly_build
 
       - name: Copy project files
         run: |
           cp -r home/user/scanly/lib scanly_build/
           cp -r home/user/scanly/assets scanly_build/ 2>/dev/null || true
           cp home/user/scanly/pubspec.yaml scanly_build/
-          cp -r home/user/scanly/android/app/src/main/res scanly_build/android/app/src/main/ 2>/dev/null || true
 
       - name: Get dependencies
         run: |
           cd scanly_build
           flutter pub get
+
+      - name: Generate Hive adapters
+        run: |
+          cd scanly_build
+          dart run build_runner build --delete-conflicting-outputs || true
 
       - name: Build Release APK
         run: |
