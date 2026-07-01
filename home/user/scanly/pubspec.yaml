@@ -11,15 +11,15 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # State Management (Generator olmadan)
+  # State Management
   flutter_riverpod: ^2.5.1
 
   # Local Database
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
-  # Camera & Image
-  camera: ^0.11.0+2
+  # Camera & Image (Uyumlu versiyon)
+  camera: ^0.10.5+5          # ← Düşürüldü (daha stabil)
   image_picker: ^1.1.2
   image: ^4.2.0
   path_provider: ^2.1.4
