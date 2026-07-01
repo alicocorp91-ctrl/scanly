@@ -13,15 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Debug - Find pubspec.yaml
-        run: |
-          echo "=== Current directory ==="
-          pwd
-          echo "=== All files ==="
-          ls -la
-          echo "=== Searching for pubspec.yaml ==="
-          find . -name "pubspec.yaml" -type f
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -36,26 +27,17 @@ jobs:
 
       - name: Get dependencies
         run: |
-          PUBSPEC=$(find . -name "pubspec.yaml" -type f | head -1)
-          if [ -z "$PUBSPEC" ]; then
-            echo "pubspec.yaml bulunamadı!"
-            exit 1
-          fi
-          DIR=$(dirname "$PUBSPEC")
-          echo "pubspec.yaml bulundu: $PUBSPEC"
-          cd "$DIR"
+          cd home/user/scanly
           flutter pub get
 
       - name: Build Release APK
         run: |
-          PUBSPEC=$(find . -name "pubspec.yaml" -type f | head -1)
-          DIR=$(dirname "$PUBSPEC")
-          cd "$DIR"
+          cd home/user/scanly
           flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: scanly-release-apk
-          path: '**/app-release.apk'
+          path: home/user/scanly/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
