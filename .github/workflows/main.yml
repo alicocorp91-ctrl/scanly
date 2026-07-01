@@ -9,10 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: scanly
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,10 +26,14 @@ jobs:
           channel: 'stable'
 
       - name: Get dependencies
-        run: flutter pub get
+        run: |
+          cd scanly
+          flutter pub get
 
       - name: Build Release APK
-        run: flutter build apk --release
+        run: |
+          cd scanly
+          flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
