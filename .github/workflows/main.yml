@@ -10,8 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug - Show folder structure
+        run: |
+          echo "=== Current directory ==="
+          pwd
+          echo "=== Files in root ==="
+          ls -la
+          echo "=== Checking for pubspec.yaml ==="
+          find . -name "pubspec.yaml" 2>/dev/null || echo "pubspec.yaml not found"
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -26,14 +35,29 @@ jobs:
           channel: 'stable'
 
       - name: Get dependencies
-        run: flutter pub get
+        run: |
+          if [ -f "pubspec.yaml" ]; then
+            flutter pub get
+          elif [ -f "scanly/pubspec.yaml" ]; then
+            cd scanly && flutter pub get
+          else
+            echo "pubspec.yaml bulunamadı!"
+            exit 1
+          fi
 
-      - name: Build Release APK
-        run: flutter build apk --release
+      - name: Build APK
+        run: |
+          if [ -f "pubspec.yaml" ]; then
+            flutter build apk --release
+          else
+            cd scanly && flutter build apk --release
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: scanly-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            scanly/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
