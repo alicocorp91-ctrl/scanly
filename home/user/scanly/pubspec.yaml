@@ -11,39 +11,24 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # State Management
   flutter_riverpod: ^2.5.1
-
-  # Local Database
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-
-  # Camera & Image (Uyumlu versiyon)
-  camera: ^0.10.5+5          # ← Düşürüldü (daha stabil)
+  camera: ^0.10.5+5
   image_picker: ^1.1.2
   image: ^4.2.0
   path_provider: ^2.1.4
   path: ^1.9.0
-
-  # PDF
   pdf: ^3.11.1
   printing: ^5.13.4
-
-  # Permissions & Sharing
   permission_handler: ^11.3.1
   share_plus: ^10.0.2
-
-  # OCR
   google_mlkit_text_recognition: ^0.13.0
   google_mlkit_commons: ^0.7.1
-
-  # UI
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.10
   intl: ^0.19.0
   file_picker: ^8.0.6
-
-  # Utilities
   uuid: ^4.4.2
   equatable: ^2.0.5
   shared_preferences: ^2.3.3
