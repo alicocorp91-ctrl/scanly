@@ -1,5 +1,5 @@
 name: scanly
-description: "Profesyonel belge tarama uygulaması"
+description: "Profesyonel belge tarama uygulaması - CamScanner kalitesinde, tamamen ücretsiz"
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -11,37 +11,54 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_riverpod: ^2.5.1
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
-  camera: ^0.9.4+21
-  image_picker: ^1.1.2
-  image: ^4.2.0
-  path_provider: ^2.1.4
-  path: ^1.9.0
-  pdf: ^3.11.1
-  printing: ^5.13.4
-  permission_handler: ^11.3.1
-  share_plus: ^10.0.2
-  google_mlkit_text_recognition: ^0.13.0
-  google_mlkit_commons: ^0.7.1
-  cupertino_icons: ^1.0.8
-  flutter_svg: ^2.0.10
-  intl: ^0.19.0
-  file_picker: ^8.0.6
-  uuid: ^4.4.2
-  equatable: ^2.0.5
-  shared_preferences: ^2.3.3
+  # ==================== STATE MANAGEMENT ====================
+  flutter_riverpod: ^2.5.1          # State yönetimi için
+  riverpod_annotation: ^2.3.5       # Riverpod için annotation desteği
+
+  # ==================== VERİTABANI ====================
+  hive: ^2.2.3                      # Yerel NoSQL veritabanı
+  hive_flutter: ^1.1.0              # Hive'ın Flutter entegrasyonu
+
+  # ==================== KAMERA & GÖRÜNTÜ ====================
+  camera: ^0.9.4+21                 # Kamera entegrasyonu (stabil versiyon)
+  image_picker: ^1.1.2              # Galeri'den fotoğraf seçme
+  image: ^4.2.0                     # Görüntü işleme (filtreler için)
+  path_provider: ^2.1.4             # Dosya yolları
+  path: ^1.9.0                      # Dosya yolu işlemleri
+
+  # ==================== PDF OLUŞTURMA ====================
+  pdf: ^3.11.1                      # PDF oluşturma
+  printing: ^5.13.4                 # PDF yazdırma ve paylaşım
+
+  # ==================== İZİNLER & PAYLAŞIM ====================
+  permission_handler: ^11.3.1       # Kamera ve depolama izinleri
+  share_plus: ^10.0.2               # Dosya paylaşımı
+
+  # ==================== OCR (METİN TANIMA) ====================
+  google_mlkit_text_recognition: ^0.13.0   # Çevrimdışı metin tanıma
+  google_mlkit_commons: ^0.7.1             # ML Kit ortak bileşenler
+
+  # ==================== UI / UX ====================
+  cupertino_icons: ^1.0.8           # iOS tarzı ikonlar
+  flutter_svg: ^2.0.10              # SVG desteği
+  intl: ^0.19.0                     # Tarih ve sayı formatlama
+  file_picker: ^8.0.6               # Dosya seçici
+
+  # ==================== YARDIMCI PAKETLER ====================
+  uuid: ^4.4.2                      # Benzersiz ID oluşturma
+  equatable: ^2.0.5                 # Nesne karşılaştırma
+  shared_preferences: ^2.3.3        # Basit yerel depolama
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
   build_runner: ^2.4.9
-  hive_generator: ^2.0.1
+  hive_generator: ^2.0.1            # Hive model generator
 
 flutter:
   uses-material-design: true
+
   assets:
     - assets/images/
     - assets/icons/

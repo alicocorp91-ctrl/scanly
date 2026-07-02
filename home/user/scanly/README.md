@@ -1,21 +1,28 @@
-# Scanly - Profesyonel Belge Tarama Uygulaması
+# 📱 Scanly - Profesyonel Belge Tarama Uygulaması
 
-**CamScanner & Simple Scanner kalitesinde, tamamen ücretsiz, yerel depolama odaklı profesyonel belge tarama uygulaması.**
+**CamScanner ve Simple Scanner kalitesinde, tamamen ücretsiz, yerel depolama odaklı profesyonel belge tarama uygulaması.**
+
+[![Flutter](https://img.shields.io/badge/Flutter-3.22.3-blue.svg)](https://flutter.dev)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Android-orange.svg)]()
+
+---
 
 ## ✨ Özellikler
 
 ### 📸 Gelişmiş Kamera
 - Profesyonel kamera vizörü ile belge kenar algılama
-- Otomatik kırpma ve perspektif düzeltme
-- Galeri'den fotoğraf seçme
+- **İnteraktif 4 köşeli kırpma** (sürükle-bırak)
+- Otomatik kenar algılama önerisi
+- Perspektif düzeltme
 - Çok sayfalı tarama desteği
 
 ### 🎨 Profesyonel Filtreler
+- **Magic Color** - Renkleri canlandırır, belgeyi parlatır
+- **B&W** - Yüksek kontrastlı siyah-beyaz (metin odaklı)
+- **Grayscale** - Normal gri tonlama
+- **Lightning** - Gölgeleri yok eder, aydınlatır
 - Orijinal
-- Magic Color
-- Siyah-Beyaz (B&W)
-- Grayscale
-- Lightning
 
 ### 📄 PDF ve Paylaşım
 - A4 ve Letter sayfa boyutu desteği
@@ -39,93 +46,179 @@
 - Haptic feedback
 - Şık onboarding
 
+---
+
 ## 🛠️ Teknoloji Yığını
 
-- **Framework:** Flutter 3.22+
-- **State Management:** Riverpod
-- **Veritabanı:** Hive
-- **Kamera:** camera + image_picker
-- **OCR:** google_mlkit_text_recognition
-- **PDF:** pdf + printing
+| Teknoloji | Kullanım |
+|---------|---------|
+| **Framework** | Flutter 3.22.3 |
+| **State Management** | Riverpod |
+| **Veritabanı** | Hive |
+| **Kamera** | camera + image_picker |
+| **Görüntü İşleme** | image paketi |
+| **OCR** | google_mlkit_text_recognition |
+| **PDF** | pdf + printing |
+| **İzinler** | permission_handler |
+
+---
 
 ## 🚀 Kurulum ve Çalıştırma
 
 ### Gereksinimler
-- Flutter SDK 3.22 veya更高
-- Android Studio / VS Code
+
+- Flutter SDK **3.22.3** veya更高
+- Dart SDK **3.4+**
+- Android Studio / VS Code + Flutter eklentisi
 - Android cihaz veya emulator (API 24+)
+- JDK 17+
 
 ### Adımlar
 
 ```bash
-# Projeyi klonlayın
-git clone <repo-url>
+# 1. Projeyi klonla
+git clone https://github.com/alicocorp91-ctrl/scanly.git
 cd scanly
 
-# Bağımlılıkları yükleyin
+# 2. Bağımlılıkları yükle
 flutter pub get
 
-# Hive adapter'larını oluşturun
-flutter packages pub run build_runner build
+# 3. Hive adapter'larını oluştur (ZORUNLU)
+dart run build_runner build --delete-conflicting-outputs
 
-# Android için APK oluşturun
-flutter build apk --release
-
-# Veya debug için
+# 4. Uygulamayı çalıştır
 flutter run
 ```
 
-## 📱 APK Çıktısı
+### Release APK Oluşturma
 
-`build/app/outputs/flutter-apk/app-release.apk`
+```bash
+# Tek komutla release APK oluştur
+flutter build apk --release
+
+# Veya ABI bazlı (daha küçük boyut)
+flutter build apk --release --split-per-abi
+```
+
+**APK Konumu:**
+```
+build/app/outputs/flutter-apk/app-release.apk
+```
+
+---
+
+## 🤖 GitHub Actions ile Otomatik APK Oluşturma
+
+Bu proje **GitHub Actions** ile otomatik olarak release APK oluşturmaktadır.
+
+### Nasıl Çalışır?
+
+1. GitHub reposuna gir
+2. **Actions** sekmesine tıkla
+3. **"Build Release APK"** workflow'unu seç
+4. **"Run workflow"** butonuna tıkla
+
+### Artifact İndirme
+
+Workflow tamamlandıktan sonra:
+- **Artifacts** bölümünden **`scanly-release-apk`** dosyasını indir
+- Dosya `.zip` olarak iner
+
+---
 
 ## 📂 Proje Yapısı
 
 ```
-lib/
-├── core/
-│   ├── constants/
-│   ├── theme/
-│   ├── services/
-│   ├── providers/
-│   └── utils/
-├── features/
-│   ├── onboarding/
-│   ├── camera/
-│   ├── editor/
-│   ├── documents/
-│   ├── ocr/
-│   └── pdf/
-├── shared/
-│   ├── models/
-│   └── widgets/
-└── main.dart
+scanly/
+├── lib/
+│   ├── core/
+│   │   ├── constants/
+│   │   ├── theme/
+│   │   ├── services/
+│   │   ├── providers/
+│   │   └── utils/
+│   ├── features/
+│   │   ├── onboarding/
+│   │   ├── camera/
+│   │   ├── editor/
+│   │   ├── documents/
+│   │   ├── ocr/
+│   │   └── settings/
+│   └── shared/
+│       ├── models/
+│       └── widgets/
+├── assets/
+│   ├── images/
+│   └── icons/
+├── .github/workflows/
+│   └── main.yml
+├── pubspec.yaml
+└── README.md
 ```
-
-## ✅ Tamamlanan Özellikler
-
-- [x] Onboarding (3 sayfa)
-- [x] Kamera + Belge overlay
-- [x] Gelişmiş görüntü editörü
-- [x] Filtreler
-- [x] Çok sayfalı tarama
-- [x] Sayfa sürükle-bırak sıralama
-- [x] PDF oluşturma ve paylaşım
-- [x] Hive veritabanı
-- [x] Klasörleme sistemi
-- [x] Arama
-- [x] Çevrimdışı OCR
-- [x] Material 3 + Dark Mode
-- [x] İzin yönetimi
-- [x] Hata yönetimi
-
-## 📝 Notlar
-
-- Tüm veriler cihaz üzerinde saklanır.
-- Reklam veya premium kısıtlaması yoktur.
-- Tamamen ücretsizdir.
 
 ---
 
-**Geliştirici:** Arena.ai Agent Mode  
-**Versiyon:** 1.0.0
+## 🔧 Geliştirme Notları
+
+### Önemli Komutlar
+
+```bash
+# Hive adapter'larını yeniden oluştur
+dart run build_runner build --delete-conflicting-outputs
+
+# Temizle ve yeniden yükle
+flutter clean && flutter pub get
+
+# Sadece Android için build
+flutter build apk --release
+```
+
+### Mimari
+
+- **Feature-First + Clean Architecture** kullanılmıştır
+- Her özellik kendi klasöründe izole edilmiştir
+- Riverpod ile state yönetimi yapılmaktadır
+- Hive ile yerel veritabanı kullanılmaktadır
+
+### Paket Versiyonları
+
+Tüm paketler `pubspec.yaml` dosyasında belirtilmiştir. Yeni paket eklerken şu kurallara uyun:
+
+- `camera` paketi: `^0.9.4+21` (daha stabil)
+- `riverpod` paketi: `^2.5.1`
+- `hive` paketi: `^2.2.3`
+
+---
+
+## 📌 Gelecek Geliştirmeler
+
+- [ ] Daha gelişmiş otomatik kenar algılama (ML tabanlı)
+- [ ] PDF filigran özelliği
+- [ ] Toplu silme ve taşıma işlemleri
+- [ ] OCR iyileştirmeleri (çoklu sayfa)
+- [ ] Bulut yedekleme (opsiyonel)
+- [ ] iOS desteği
+
+---
+
+## 📝 Lisans
+
+Bu proje MIT lisansı altında yayınlanmıştır.
+
+---
+
+## 👨‍💻 Geliştirici
+
+**Arena.ai Agent Mode** tarafından geliştirilmiştir.
+
+---
+
+## 📞 Destek
+
+Herhangi bir sorun yaşarsanız:
+1. GitHub Issues bölümünden bildirin
+2. Veya mevcut workflow'ları kontrol edin
+
+---
+
+**Scanly** - Profesyonel belge tarama, tamamen ücretsiz.
