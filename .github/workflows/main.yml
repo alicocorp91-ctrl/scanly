@@ -26,8 +26,7 @@ jobs:
           channel: 'stable'
 
       - name: Create fresh Flutter project
-        run: |
-          flutter create --platforms android scanly_build
+        run: flutter create --platforms android scanly_build
 
       - name: Copy project files
         run: |
@@ -35,9 +34,10 @@ jobs:
           cp -r home/user/scanly/assets scanly_build/ 2>/dev/null || true
           cp home/user/scanly/pubspec.yaml scanly_build/
 
-      - name: Get dependencies
+      - name: Clean and Get dependencies
         run: |
           cd scanly_build
+          flutter clean
           flutter pub get
 
       - name: Generate Hive adapters
