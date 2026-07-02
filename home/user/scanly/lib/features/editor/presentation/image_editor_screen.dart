@@ -2,8 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scanly/core/theme/app_colors.dart';
-import 'package:scanly/features/editor/presentation/filter_preview.dart';
-import 'package:scanly/features/editor/widgets/crop_overlay.dart';
+import 'package:scanly/features/editor/widgets/interactive_cropper.dart';
 import 'package:scanly/core/utils/image_utils.dart';
 import 'package:scanly/shared/models/document_model.dart';
 import 'package:scanly/core/providers/document_provider.dart';
@@ -29,61 +28,53 @@ class _ImageEditorScreenState extends ConsumerState<ImageEditorScreen> {
   late String _currentImagePath;
   String _selectedFilter = 'Original';
   bool _isProcessing = false;
-  List<String> _pages = [];
+  bool _showCropper = false;
 
-  // For multi-page support
   final List<String> _processedPages = [];
 
   @override
   void initState() {
     super.initState();
     _currentImagePath = widget.imagePath;
-    if (widget.existingPages != null) {
-      _pages = List.from(widget.existingPages!);
-    }
   }
 
-  Future<void> _applyFilter(String filter) async {
+  void _openCropper() {
     setState(() {
-      _selectedFilter = filter;
-      _isProcessing = true;
-    });
-
-    // Simulate filter processing (in real implementation use image package)
-    await Future.delayed(const Duration(milliseconds: 350));
-
-    // Here we would actually apply filter using image package
-    // For now we just update the UI state
-
-    setState(() {
-      _isProcessing = false;
+      _showCropper = true;
     });
   }
 
-  Future<void> _saveAndContinue() async {
+  void _closeCropper() {
+    setState(() {
+      _showCropper = false;
+    });
+  }
+
+  Future<void> _applyCrop(List<Offset> normalizedCorners) async {
     setState(() => _isProcessing = true);
 
     try {
-      // Compress and save the processed image
-      final savedPath = await ImageUtils.compressAndSaveImage(_currentImagePath);
+      // Perspektif düzeltme + kırpma
+      final correctedPath = await ImageUtils.applyPerspectiveCorrection(
+        _currentImagePath,
+        normalizedCorners,
+      );
+
+      _currentImagePath = correctedPath;
 
       if (widget.isMultiPage) {
-        _processedPages.add(savedPath);
-        
-        // Go back to camera to add more pages
+        _processedPages.add(_currentImagePath);
         if (mounted) {
           Navigator.pop(context);
-          // Return the new page to parent
-          Navigator.pop(context, savedPath);
+          Navigator.pop(context, _currentImagePath);
         }
       } else {
-        // Single page - create document
         final documentName = 'Belge_${DateTime.now().toString().substring(0, 16).replaceAll(':', '-')}';
         
         final document = Document.create(
           name: documentName,
-          imagePaths: [savedPath],
-          thumbnailPath: await ImageUtils.createThumbnail(savedPath),
+          imagePaths: [_currentImagePath],
+          thumbnailPath: await ImageUtils.createThumbnail(_currentImagePath),
         );
 
         await ref.read(documentsProvider.notifier).addDocument(document);
@@ -101,7 +92,97 @@ class _ImageEditorScreenState extends ConsumerState<ImageEditorScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Kaydetme hatası: $e')),
+          SnackBar(content: Text('İşlem hatası: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _showCropper = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _applyFilter(String filter) async {
+    setState(() {
+      _selectedFilter = filter;
+      _isProcessing = true;
+    });
+
+    try {
+      String newPath;
+
+      switch (filter) {
+        case 'Magic Color':
+          newPath = await ImageUtils.applyMagicColor(_currentImagePath);
+          break;
+        case 'B&W':
+          newPath = await ImageUtils.applyBlackAndWhite(_currentImagePath);
+          break;
+        case 'Grayscale':
+          newPath = await ImageUtils.applyGrayscale(_currentImagePath);
+          break;
+        case 'Lightning':
+          newPath = await ImageUtils.applyLightning(_currentImagePath);
+          break;
+        default:
+          newPath = await ImageUtils.applyOriginal(_currentImagePath);
+      }
+
+      setState(() {
+        _currentImagePath = newPath;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Filtre uygulanamadı: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveWithoutCrop() async {
+    setState(() => _isProcessing = true);
+
+    try {
+      final savedPath = await ImageUtils.compressAndSaveImage(_currentImagePath);
+
+      if (widget.isMultiPage) {
+        _processedPages.add(savedPath);
+        if (mounted) {
+          Navigator.pop(context);
+          Navigator.pop(context, savedPath);
+        }
+      } else {
+        final documentName = 'Belge_${DateTime.now().toString().substring(0, 16).replaceAll(':', '-')}';
+        
+        final document = Document.create(
+          name: documentName,
+          imagePaths: [savedPath],
+          thumbnailPath: await ImageUtils.createThumbnail(savedPath),
+        );
+
+        await ref.read(documentsProvider.notifier).addDocument(document);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Belge kaydedildi')),
+          );
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Hata: $e')),
         );
       }
     } finally {
@@ -115,6 +196,17 @@ class _ImageEditorScreenState extends ConsumerState<ImageEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_showCropper) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: InteractiveCropper(
+          imagePath: _currentImagePath,
+          onCropComplete: _applyCrop,
+          onCancel: _closeCropper,
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -123,7 +215,7 @@ class _ImageEditorScreenState extends ConsumerState<ImageEditorScreen> {
         title: const Text('Düzenle', style: TextStyle(color: Colors.white)),
         actions: [
           TextButton(
-            onPressed: _isProcessing ? null : _saveAndContinue,
+            onPressed: _isProcessing ? null : _saveWithoutCrop,
             child: const Text(
               'Kaydet',
               style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
@@ -133,23 +225,17 @@ class _ImageEditorScreenState extends ConsumerState<ImageEditorScreen> {
       ),
       body: Column(
         children: [
-          // Image Preview Area
+          // Görsel Önizleme
           Expanded(
             flex: 5,
             child: Stack(
               children: [
-                // Main Image
                 Center(
                   child: Image.file(
                     File(_currentImagePath),
                     fit: BoxFit.contain,
                   ),
                 ),
-
-                // Interactive Crop Overlay
-                const CropOverlay(),
-
-                // Processing Overlay
                 if (_isProcessing)
                   Container(
                     color: Colors.black54,
@@ -161,7 +247,7 @@ class _ImageEditorScreenState extends ConsumerState<ImageEditorScreen> {
             ),
           ),
 
-          // Filter Selection
+          // Filtreler
           Container(
             height: 130,
             color: Colors.black87,
@@ -172,10 +258,7 @@ class _ImageEditorScreenState extends ConsumerState<ImageEditorScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      Text(
-                        'Filtreler',
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
-                      ),
+                      Text('Filtreler', style: TextStyle(color: Colors.white70, fontSize: 14)),
                     ],
                   ),
                 ),
@@ -197,32 +280,49 @@ class _ImageEditorScreenState extends ConsumerState<ImageEditorScreen> {
             ),
           ),
 
-          // Bottom Actions
+          // Alt Butonlar
           Container(
             padding: const EdgeInsets.all(20),
             color: Colors.black,
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _retakePhoto,
-                    icon: const Icon(Icons.camera_alt, color: Colors.white),
-                    label: const Text('Yeniden Çek', style: TextStyle(color: Colors.white)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.white54),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _retakePhoto,
+                        icon: const Icon(Icons.camera_alt, color: Colors.white),
+                        label: const Text('Yeniden Çek', style: TextStyle(color: Colors.white)),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.white54),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _isProcessing ? null : _openCropper,
+                        icon: const Icon(Icons.crop),
+                        label: const Text('Kırp'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.accent,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: _isProcessing ? null : _saveAndContinue,
+                    onPressed: _isProcessing ? null : _saveWithoutCrop,
                     icon: const Icon(Icons.check),
                     label: Text(widget.isMultiPage ? 'Sayfa Ekle' : 'Bitir ve Kaydet'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
                 ),

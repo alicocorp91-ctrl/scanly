@@ -11,6 +11,7 @@ import 'package:scanly/features/documents/presentation/document_detail_screen.da
 import 'package:scanly/features/camera/presentation/camera_screen.dart';
 import 'package:scanly/features/camera/presentation/multi_page_camera_screen.dart';
 import 'package:scanly/core/theme/app_colors.dart';
+import 'package:scanly/features/settings/presentation/settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -53,9 +54,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.settings_rounded),
             onPressed: () {
-              // TODO: Settings screen (later)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Ayarlar yakında eklenecek')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
             },
           ),
